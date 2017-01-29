@@ -4,7 +4,7 @@ package com.example.rasmus.parkme;
  * Created by rasmus on 2017-01-29.
  */
 
-public class ParkingLot {
+public class ParkingLot implements Comparable<ParkingLot>{
     private String name;
     private int spaces;
     private int freeSpaces;
@@ -44,5 +44,16 @@ public class ParkingLot {
 
     public String getCost() {
         return cost;
+    }
+
+    @Override
+    public int compareTo(ParkingLot parkingLot) {
+        int compareDistance = ((ParkingLot) parkingLot).getDistance();
+
+        //ascending order
+        return this.distance - compareDistance;
+
+        //descending order
+        //return compareDistance - this.distance;
     }
 }
