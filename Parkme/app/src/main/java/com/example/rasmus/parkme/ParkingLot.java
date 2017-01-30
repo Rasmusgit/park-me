@@ -48,12 +48,10 @@ public class ParkingLot implements Comparable<ParkingLot>{
 
     @Override
     public int compareTo(ParkingLot parkingLot) {
-        int compareDistance = ((ParkingLot) parkingLot).getDistance();
+        int compareDistance = parkingLot.getDistance();
 
         //ascending order
         return this.distance - compareDistance;
 
-        //descending order
-        //return compareDistance - this.distance;
     }
 }

@@ -1,17 +1,20 @@
 package com.example.rasmus.parkme;
 
 import android.Manifest;
+import android.app.Activity;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.AsyncTask;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Adapter;
 import android.widget.Button;
 import android.widget.ListView;
@@ -41,14 +44,18 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
     private static final String APPID = "4cb244ca-9939-4848-a871-452aafa54d3b";
     private static final String FORMAT = "JSON";
-    private static String latitude = "57.656216";
-    private static String longitude = "11.920853";
+    private static String latitude = "57.6907990";
+    private static String longitude = "11.9719640";
     private static String radius = "10000";
     private TextView printData;
     private GoogleApiClient mGoogleApiClient;
     private Location mLastLocation;
     private ListView listview;
     private ParkingLot[] parkingLotArray;
+    private SeekBar seekbar;
+    private TextView seekbarTextView;
+    private boolean useCurrentPosition = true;
+
 
 
     @Override
@@ -56,8 +63,9 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        // Create an instance of GoogleAPIClient.
 
+
+        // Create an instance of GoogleAPIClient.
         if (mGoogleApiClient == null) {
             mGoogleApiClient = new GoogleApiClient.Builder(this)
                     .addConnectionCallbacks(this)
@@ -66,29 +74,19 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                     .build();
         }
 
-
+        /*
         Button hitbtn = (Button) findViewById(R.id.btnHit);
         printData = (TextView) findViewById(R.id.printJSON);
-        final TextView seekbarTextView = (TextView) findViewById(R.id.seekBarTextView);
-
-        final SeekBar seekbar = (SeekBar) findViewById(R.id.seekBar);
+        */
+        //Seelbar and it's TextView
+        seekbar = (SeekBar) findViewById(R.id.seekBar);
+        seekbarTextView = (TextView) findViewById(R.id.seekBarTextView);
 
         seekbar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
-                int val = i * 10000;
-                radius = val + "";
-                seekbarTextView.setText(radius + " m");
 
-                if (mLastLocation != null) {
-                    latitude = String.valueOf(mLastLocation.getLatitude());
-                    longitude = String.valueOf(mLastLocation.getLongitude());
-                }
-
-                //new JSONTask().execute("http://data.goteborg.se/ParkingService/v1.3/PrivateParkings/"+APPID+"?latitude="+LATITUDE+"&longitude="+LONGITUDE+/*"&radius="+RADIUS+*/"&format="+FORMAT);
-                //new JSONTask().execute("http://data.goteborg.se/ParkingService/v1.3/PrivateParkings/%7B4cb244ca-9939-4848-a871-452aafa54d3b%7D?latitude=57.694401&longitude=12.007370&radius=1000&format=JSON");
-                //new JSONTask().execute("http://data.goteborg.se/ParkingService/v1.3/PrivateParkings/4cb244ca-9939-4848-a871-452aafa54d3b?latitude=57.694401&longitude=12.007370&radius=1000&format=JSON");
-                new JSONTask().execute("http://data.goteborg.se/ParkingService/v1.3/PrivateParkings/" + APPID + "?latitude=" + latitude + "&longitude=" + longitude + "&radius=" + radius + "&format=" + FORMAT + "");
+                updateParkingLotList();
             }
 
             @Override
@@ -105,24 +103,31 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
         listview = (ListView) findViewById(R.id.listJSON);
 
-
-
+        /*
         hitbtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
 
-                if (mLastLocation != null) {
-                    latitude = String.valueOf(mLastLocation.getLatitude());
-                    longitude = String.valueOf(mLastLocation.getLongitude());
-                }
+                updateParkingLotList();
 
-                //new JSONTask().execute("http://data.goteborg.se/ParkingService/v1.3/PrivateParkings/"+APPID+"?latitude="+LATITUDE+"&longitude="+LONGITUDE+/*"&radius="+RADIUS+*/"&format="+FORMAT);
-                //new JSONTask().execute("http://data.goteborg.se/ParkingService/v1.3/PrivateParkings/%7B4cb244ca-9939-4848-a871-452aafa54d3b%7D?latitude=57.694401&longitude=12.007370&radius=1000&format=JSON");
-                //new JSONTask().execute("http://data.goteborg.se/ParkingService/v1.3/PrivateParkings/4cb244ca-9939-4848-a871-452aafa54d3b?latitude=57.694401&longitude=12.007370&radius=1000&format=JSON");
-                new JSONTask().execute("http://data.goteborg.se/ParkingService/v1.3/PrivateParkings/"+APPID+"?latitude="+latitude+"&longitude="+longitude+"&radius="+radius+"&format="+FORMAT+"");
             }
-        });
+        });*/
 
+
+
+    }
+
+    private void updateParkingLotList() {
+
+        radius = (seekbar.getProgress() + 1) * 300 + "";
+        seekbarTextView.setText(radius + " m");
+
+        if (mLastLocation != null && useCurrentPosition) {
+            latitude = String.valueOf(mLastLocation.getLatitude());
+            longitude = String.valueOf(mLastLocation.getLongitude());
+        }
+
+        new JSONTask().execute("http://data.goteborg.se/ParkingService/v1.3/PrivateParkings/" + APPID + "?latitude=" + latitude + "&longitude=" + longitude + "&radius=" + radius + "&format=" + FORMAT + "");
 
     }
 
@@ -158,6 +163,8 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         mLastLocation = LocationServices.FusedLocationApi.getLastLocation(
                 mGoogleApiClient);
 
+        updateParkingLotList();
+
     }
 
     @Override
@@ -169,30 +176,36 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     public class JSONTask extends AsyncTask<String,String,String> {
         @Override
         protected String doInBackground(String... params) {
+
             HttpURLConnection connection = null;
             BufferedReader reader = null;
+
             try {
 
+                //Connection to url
                 URL url = new URL(params[0]);
                 connection =(HttpURLConnection) url.openConnection();
                 connection.connect();
 
+                //Start input stream
                 InputStream stream = connection.getInputStream();
 
+                //Initiating reader
                 reader = new BufferedReader(new InputStreamReader(stream));
 
+                //Initiating string buffer
                 StringBuffer buffer = new StringBuffer();
 
                 String line = "";
+                //loop through all lines
                 while((line = reader.readLine()) != null){
                     buffer.append(line);
                 }
 
                 String finalJSON = buffer.toString();
 
+                //convert string to an JSON array
                 JSONArray parentObject = new JSONArray(finalJSON);
-
-
 
                 ParkingLot parkingLot;
                 parkingLotArray = new ParkingLot[parentObject.length()];
@@ -202,6 +215,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                     finalObject = parentObject.getJSONObject(i);
 
                     String name = finalObject.getString("Name");
+
                     int totSpaces;
                     if(!finalObject.isNull("ParkingSpaces")) {
                         totSpaces = finalObject.getInt("ParkingSpaces");
@@ -246,8 +260,8 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                 //sorting distance
                 Arrays.sort(parkingLotArray);
 
-                return "Done! length: " + parkingLotArray.length + "    lat:"+ latitude +" long: " + longitude ;
-                //int free = finalObject.getInt("ParkingSpaces");
+                //return "Done! length: " + parkingLotArray.length + " lat:"+ latitude +" long: " + longitude ;
+
 
 
 
@@ -274,7 +288,15 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         @Override
         protected void onPostExecute(String result) {
             super.onPostExecute(result);
-            printData.setText(result);
+            //printData.setText(result);
+
+            if (parkingLotArray != null){
+                Snackbar snackbar = Snackbar
+                        .make(findViewById(R.id.activity_main), "Hittade " + parkingLotArray.length + " parkeringar nära dig ", Snackbar.LENGTH_LONG);
+                snackbar.show();
+
+            }
+
             listview.setAdapter(new parkingAdapter(MainActivity.this, parkingLotArray));
         }
     }

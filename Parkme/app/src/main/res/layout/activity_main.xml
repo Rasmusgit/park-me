@@ -7,25 +7,26 @@
     android:layout_height="match_parent"
     tools:context="com.example.rasmus.parkme.MainActivity">
 
-
+    <!--
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="hit"
         android:id="@+id/btnHit"/>
-
+        -->
+    <!--
     <TextView
         android:id="@+id/printJSON"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Hello World!" />
-
+    -->
     <SeekBar
         style="@style/Widget.AppCompat.SeekBar.Discrete"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="60dp"
         android:max="10"
-        android:progress="3"
+        android:progress="1"
         android:id="@+id/seekBar" />
 
     <TextView
@@ -33,8 +34,6 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/seekBarTextView" />
-
-
 
 
     <ListView
