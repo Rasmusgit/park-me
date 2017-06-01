@@ -4,6 +4,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.net.Uri;
+import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -75,12 +78,16 @@ public class parkingAdapter extends BaseAdapter{
         vi.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
-                Uri gmmIntentUri = Uri.parse("geo:37.7749,-122.4194?q="+parkingLot.getName());
+                //// TODO: 2017-05-31 If no adress found seach for long and latitude 
+                /*Uri gmmIntentUri = Uri.parse("geo:37.7749,-122.4194?q="+parkingLot.getName());
                 Intent mapIntent = new Intent(Intent.ACTION_VIEW, gmmIntentUri);
                 mapIntent.setPackage("com.google.android.apps.maps");
                 final View parentView = parent;
-                context.startActivity(mapIntent);
+                context.startActivity(mapIntent);*/
+                FragmentManager fragmentManager = ((FragmentActivity) context).getSupportFragmentManager();
+                FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+                fragmentTransaction.replace(R.id.container_wrapper, new ContactFragment());
+                fragmentTransaction.commit();
             }
         });
 
